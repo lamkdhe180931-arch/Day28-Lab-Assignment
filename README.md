@@ -31,10 +31,32 @@ Kaggle (GPU T4/P100):
 
 ## Quick Start
 
+### 0. Chạy nhanh để nộp bài khi không có Kaggle GPU
+
+Repo này có chế độ `local-demo`: API Gateway tự trả lời demo khi
+`LOCAL_DEMO_MODE=true`, và embedding script tự tạo vector local nếu không có
+`EMBED_NGROK_URL`.
+
+```bash
+cp .env.example .env
+docker compose up -d --build
+
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements-local.txt
+python scripts/quick_local_demo.py
+
+curl http://localhost:8000/health
+pytest smoke-tests/ -v
+python scripts/production_readiness_check.py
+```
+
+Khi chụp màn hình, `GET /health` sẽ hiển thị `"mode": "local-demo"`.
+Đây là fallback để demo đầy đủ local stack khi không chạy được Kaggle.
+
 ### 1. Khởi động Local Stack
 
 ```bash
-cd lab28
 docker compose up -d
 docker compose ps  # Kiểm tra tất cả services Up
 ```

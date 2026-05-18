@@ -1,8 +1,12 @@
 # smoke-tests/test_e2e.py
-import pytest, requests, time, os
+import pytest, requests, time, os, subprocess, sys
 
 BASE_URL = "http://localhost:8000"
 VLLM_URL = os.environ.get("VLLM_NGROK_URL", "")
+
+
+def ensure_local_demo_seeded():
+    subprocess.run([sys.executable, "scripts/quick_local_demo.py"], check=True)
 
 # ── Test 1: Happy Path — Full Inference Request ───────────────
 class TestHappyPath:
@@ -29,6 +33,7 @@ class TestHappyPath:
 class TestDataIngestion:
     def test_kafka_ingest_and_qdrant_store(self):
         """Ingest data vào Kafka → pipeline → vector store"""
+        ensure_local_demo_seeded()
         from kafka import KafkaProducer
         import json
 
@@ -92,6 +97,7 @@ class TestFailurePath:
 class TestFeatureStore:
     def test_feast_redis_has_features(self):
         """Feast (Redis) có features sau khi pipeline chạy"""
+        ensure_local_demo_seeded()
         import redis
         r = redis.Redis(host="localhost", port=6379, decode_responses=True)
         keys = r.keys("feature:*")
